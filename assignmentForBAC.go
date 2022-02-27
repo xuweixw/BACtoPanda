@@ -106,7 +106,7 @@ func Location() (*RegionSet, int) {
 	var results = InitRegionSet()
 	var num int
 	for i := 1; i <= 25; i++ {
-		poolMap[i] = NewRegionSet(fmt.Sprintf(string(destinationDir)+"/depthCalling/%s-%02d_correct.bed",UNIT, i))
+		poolMap[i] = NewRegionSet(fmt.Sprintf(string(destinationDir)+"/depthCalling/%s-%02d_correct.bed", UNIT, i))
 	}
 	for k, v := range ROWID {
 		rowMap[k] = Intersection(poolMap[v[0]], poolMap[v[1]])
@@ -140,7 +140,7 @@ func Location() (*RegionSet, int) {
 func Assignment() {
 	// Assignment
 	r, num := Location()
-	file, err := os.Create(string(destinationDir) + "/assignment/"+string(UNIT)+"_BAC.bed")
+	file, err := os.Create(string(destinationDir) + "/assignment/" + string(UNIT) + "_BAC.bed")
 	defer file.Close()
 	if err != nil {
 		log.Fatal(err)
