@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
-	"strings"
 )
 
 // genenome sequence
@@ -50,7 +50,7 @@ func (p *Unit) String() string { return string(*p) }
 // 检查指定的单元名是否在UNITS中登记
 func (p *Unit) Set(val string) error {
 	var err error
-	if _, ok := UNITS[val]; ok{
+	if _, ok := UNITS[val]; ok {
 		*p = Unit(val)
 	} else {
 		err = errors.New(val + " is not a valid unit name.")
@@ -58,20 +58,25 @@ func (p *Unit) Set(val string) error {
 	return err
 }
 
-// -- Source Directory Value
-// -- Check weather the disrectory is exist and all 25 pool sequence files in here
+// SourceDirectory is a slice stored each pool directory.
+// SourceDirectory implements flag.Value interface by Set() and String() methods.
+// It has Set() method that receive a flag string that may refer to a root directory or a tab-delimited file.
 type SourceDirectory []string
 
 func (s *SourceDirectory) String() string { return fmt.Sprintf("%s", *s) }
 
+// Set check flag value and set the absolute path of each pool dictionary.
+// If val is a directory, check all 25 pool sequence files in here.
+// If val is a tab-delimited file, read the paths from it.
 func (s *SourceDirectory) Set(val string) error {
-	var err error
-	numFile := 0
-	for _, path := range strings.Split(val, ",") {
-		if _, err := os.Stat(path); os.IsNotExist(err) { // check existence
-			return errors.New("Given the source directory is not exist.")
-		}
-		if files, err := ioutil.ReadDir(path); err != nil { // check number of files in directory
+	var numFile int
+	path, err := os.Stat(val)
+	if os.IsNotExist(err) { // check existence
+		return errors.New("Given the source directory is not exist.")
+	}
+
+	if path.IsDir() { // given a directory that contains all 25 pool subdirectory.
+		if files, err := ioutil.ReadDir(val); err != nil { // check number of files in directory
 			return err
 		} else {
 			fileNameRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
@@ -80,10 +85,22 @@ func (s *SourceDirectory) Set(val string) error {
 				if fileNameRegexp.FindStringSubmatch(name) != nil {
 					numFile++
 				}
+				*s = append(*s, val+"/"+file.Name())
 			}
 		}
-		*s = append(*s, path)
+	} else { // given a tab-delimited file that contains all 25 pool subdirectory.
+		file, err := os.Open(val)
+		if err != nil {
+			return err
+		}
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			file := scanner.Text()
+			*s = append(*s, file)
+			numFile++
+		}
 	}
+
 	if numFile != 25 {
 		log.Printf("Given the source directory <%s>, only %d sequence files not 25.", val, numFile)
 		os.Exit(0)
@@ -244,8 +261,8 @@ func FlagParse() {
 	// Get the arguments form command line
 	flag.Var(&genome, "genome", "Specify the path of the genome sequence used in bowtie2 alignment")
 	flag.Var(&PROFILE, "profile", "Specify the path of the enzyme profile file for accuracy of BAC terminals.")
-	flag.Var(&sourceDir, "sourceDir", "Specify the source directory"+
-		" in which all 25 files in a supperpool must be exist.")
+	flag.Var(&sourceDir, "sourceDir", "Specify the pool files by superpool root directory "+
+		"or tab-delimited file which all 25 files in a supperpool must exist.")
 	flag.Var(&destinationDir, "destDir", "Specify the destination directory for all outputs.")
 	flag.Var(&UNIT, "unit", "Specify the palte numbers"+
 		" with a comma-seperated string.\n\texample: 1,2,3,4,5,6,7")
