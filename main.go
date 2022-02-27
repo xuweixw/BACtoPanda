@@ -23,30 +23,28 @@ func main() {
 	checkSubdirectory(string(destinationDir), "VES-BES")
 
 	// Alignment and DepthCalling
-	for _, path := range sourceDir {
-		pools, err := os.ReadDir(path)
+	for _, subDir := range sourceDir {
+		pool, err := os.Stat(subDir)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, pool := range pools {
-			if pool.Name()[:2] == "SP" {
-				samplePath := path + "/" + pool.Name()
-				switch step {
-				case ENTIRE:
-					runBowtie2(samplePath)            //Bowtie2
-					runSamtools(samplePath)           //Samtools
-					calculatePotentialBAC(samplePath) //DepthCalling
-					FindTwoVESBES(samplePath)
-					correctBED(samplePath)
-				case ALIGNMENT:
-					runBowtie2(samplePath)
-				case DEPTHCALLING:
-					calculatePotentialBAC(samplePath)
-				case EXTRACTION:
-					FindTwoVESBES(samplePath)
-				case CORRECT:
-					correctBED(samplePath)
-				}
+
+		if pool.Name()[:2] == "SP" {
+			switch step {
+			case ENTIRE:
+				runBowtie2(subDir)            //Bowtie2
+				runSamtools(subDir)           //Samtools
+				calculatePotentialBAC(subDir) //DepthCalling
+				FindTwoVESBES(subDir)
+				correctBED(subDir)
+			case ALIGNMENT:
+				runBowtie2(subDir)
+			case DEPTHCALLING:
+				calculatePotentialBAC(subDir)
+			case EXTRACTION:
+				FindTwoVESBES(subDir)
+			case CORRECT:
+				correctBED(subDir)
 			}
 		}
 	}
