@@ -7,12 +7,16 @@
 ### 2021-12-31 更新
 1. 修改plateID参数解析方式，将原本逗号分隔的数组指定改为指定单元编号，及SP01、SP02、SP03等
 2. 修改runBowtie2.go line 20, "100" to string(threads)
-3. 运行SP03
-    ```bash
+3. 编译
+```bash
+go build -o BACtoPanda ../BACtoPanda 
+```
+4.运行SP03
+```bash
    ~/software/toolkit/BACtoPanda/BACtoPanda 
         -genome=/home/Xuwei/reference_genome/asm.cleaned.fasta.assembly.assembly.FINAL.fasta 
         -sourceDir=/mnt/raw_data/data_shenfujun/DNA/X101SC21083152-Z01-J004/2.cleandata/
         -unit=SP03 
         -threads=40  
         -profile=/home/Xuwei/reference_genome/EnzymeProfile/panda-genome.bed
-   
+```
