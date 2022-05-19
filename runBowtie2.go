@@ -11,7 +11,9 @@ import (
 //传入样本目录名称，完成自动分析，结果保存在mapping_result目录下
 func runBowtie2(samplePath string) {
 	// parse filePrefix and sampleID
-	filePrefixRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
+
+	// filePrefixRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
+	filePrefixRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}.*`)
 	filePrefix := filePrefixRegexp.FindStringSubmatch(samplePath)[0]
 	sampeIDRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}`)
 	sampleID := sampeIDRegexp.FindStringSubmatch(samplePath)[0]

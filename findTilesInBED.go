@@ -18,6 +18,7 @@ type Tile struct {
 	depth           float32
 	next            *Tile
 }
+
 type TileLinkedlist struct {
 	head *Tile
 	tail *Tile

@@ -79,7 +79,8 @@ func (s *SourceDirectory) Set(val string) error {
 		if files, err := ioutil.ReadDir(val); err != nil { // check number of files in directory
 			return err
 		} else {
-			fileNameRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
+			// fileNameRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
+			fileNameRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}.*`)
 			for _, file := range files {
 				name := file.Name()
 				if fileNameRegexp.FindStringSubmatch(name) != nil {
