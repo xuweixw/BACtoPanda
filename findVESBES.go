@@ -25,12 +25,23 @@ var (
 // FindTwoVESBES function find forward and reverse VES-BES reads from Illumina Paired-end reads.
 // The VES-BES reads will save in fastq format files.
 func FindTwoVESBES(samplePath string) {
-	filePrefixRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}_.*-1.{1}`)
+	filePrefixRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}.*`)
 	filePrefix := filePrefixRegexp.FindStringSubmatch(samplePath)[0]
 	sampleIDRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}`)
 	sampleID := sampleIDRegexp.FindStringSubmatch(samplePath)[0]
-	R1 := samplePath + "/" + filePrefix + "_1.clean.fq.gz"
-	R2 := samplePath + "/" + filePrefix + "_2.clean.fq.gz"
+
+	// Check file name suffix
+	const (
+		SUFFIX1 = ".clean.fq.gz"
+		SUFFIX2 = ".fq.gz"
+	)
+	var suffix string = SUFFIX1
+	if _, err := os.Stat(samplePath + "/" + filePrefix + "_1" + SUFFIX1); os.IsNotExist(err) {
+		suffix = SUFFIX2
+	}
+
+	R1 := samplePath + "/" + filePrefix + "_1" + suffix
+	R2 := samplePath + "/" + filePrefix + "_2" + suffix
 
 	//Preparation for find HindIII site
 	FS = ReadFeatureSet(PROFILE.String())

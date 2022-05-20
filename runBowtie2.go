@@ -17,10 +17,21 @@ func runBowtie2(samplePath string) {
 	filePrefix := filePrefixRegexp.FindStringSubmatch(samplePath)[0]
 	sampeIDRegexp := regexp.MustCompile(`SP[0-9]{2}-[0-9]{2}`)
 	sampleID := sampeIDRegexp.FindStringSubmatch(samplePath)[0]
+
+	// Check file name suffix
+	const (
+		SUFFIX1 = ".clean.fq.gz"
+		SUFFIX2 = ".fq.gz"
+	)
+	var suffix string = SUFFIX1
+	if _, err := os.Stat(samplePath + "/" + filePrefix + "_1" + SUFFIX1); os.IsNotExist(err) {
+		suffix = SUFFIX2
+	}
+
 	//launch Bowtie2 mapping
 	cmd := exec.Command("/home/Xuwei/miniconda3/bin/bowtie2",
 		"--threads", threads.String(), "-x", string(genome),
-		"-1", samplePath+"/"+filePrefix+"_1.clean.fq.gz", "-2", samplePath+"/"+filePrefix+"_2.clean.fq.gz", "-S", string(destinationDir)+"/alignment/"+sampleID+".sam") //路径需要写全 参数字符串前后不能有空格
+		"-1", samplePath+"/"+filePrefix+"_1"+suffix, "-2", samplePath+"/"+filePrefix+"_2"+suffix, "-S", string(destinationDir)+"/alignment/"+sampleID+".sam") //路径需要写全 参数字符串前后不能有空格
 	stdoutStderr, err := cmd.CombinedOutput() //结果输出到stderror而不是stdout
 	if err != nil {
 		log.Printf("Have a error in %s: %s\n", cmd.String(), err)
